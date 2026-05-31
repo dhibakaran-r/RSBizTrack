@@ -1,6 +1,18 @@
-venv/
-__pycache__/
-*.pyc
-.env
-*.db
-.env.example
+# /venv/
+# __pycache__/
+# *.pyc
+# .env
+# *.db
+# .env.example
+
+# Backend
+backend/venv/
+backend/.env
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+
+# Frontend
+frontend/node_modules/
+frontend/.env
+frontend/dist/
