@@ -4,6 +4,8 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.security import HTTPBearer
 from app.core.config import settings
 from app.auth.router import router as auth_router
+from app.menus.router import router as menu_router
+from app.dashboard.router import router as dashboard_router
 from app.businesses.router import router as business_router
 from app.categories.router import router as category_router
 from app.units.router import router as unit_router
@@ -56,6 +58,8 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(menu_router)
+app.include_router(dashboard_router)
 app.include_router(business_router)
 app.include_router(category_router)
 app.include_router(unit_router)

@@ -1,1 +1,180 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary-50:  #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-900: #1e3a5f;
+  --color-secondary-500: #10b981;
+  --color-secondary-600: #059669;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger:  #ef4444;
+  --color-info:    #3b82f6;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+:root {
+  --sidebar-width:     260px;
+  --sidebar-collapsed: 70px;
+  --navbar-height:     60px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: #f8fafc;
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: #f1f5f9; }
+  ::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 99px;
+  }
+}
+
+@layer components {
+  .main-content {
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.55);
+    white-space: nowrap;
+    overflow: hidden;
+    transition: background 0.15s ease, color 0.15s ease;
+    will-change: background, color;
+  }
+
+  .nav-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .nav-item.active {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+    font-weight: 500;
+  }
+
+  .nav-item.active:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+  }
+
+  .toggle-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+  }
+
+  .toggle-btn:hover {
+    background: rgba(255,255,255,0.18);
+  }
+}
+
+/* @layer components {
+  .sidebar {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .main-content {
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .nav-link {
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.55);
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  
+  .nav-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+  }
+  
+  .nav-item.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    font-weight: 500;
+  }
+} */
+
+/* @layer components {
+  .nav-item {
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.55);
+    white-space: nowrap;
+    overflow: hidden;
+    transition: background 0.15s ease, color 0.15s ease;
+    will-change: background, color;
+  }
+
+  .nav-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .nav-item.active {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+    font-weight: 500;
+  }
+
+  .nav-item.active:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+  }
+
+  .toggle-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+  }
+
+  .toggle-btn:hover {
+    background: rgba(255,255,255,0.18);
+  }
+} */
