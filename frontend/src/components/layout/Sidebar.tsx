@@ -44,45 +44,19 @@ const Sidebar = ({ menus }: SidebarProps) => {
         }}
       >
         {/* Logo wrapper */}
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          overflow: "hidden",
-          flex: 1,
-          minWidth: 0,
-        }}>
-
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            overflow: "hidden",
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
           {/* Collapsed — just RS text, no SVG complexity */}
           {collapsed ? (
-            <div style={{
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              background: "rgba(255,255,255,0.08)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}>
-              <span style={{
-                color: "white",
-                fontSize: 14,
-                fontWeight: 700,
-                fontFamily: "-apple-system, sans-serif",
-                letterSpacing: 0.5,
-              }}>
-                RS
-              </span>
-            </div>
-          ) : (
-            /* Expanded — RS box + BizTrack name */
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              overflow: "hidden",
-            }}>
-              <div style={{
+            <div
+              style={{
                 width: 36,
                 height: 36,
                 borderRadius: 8,
@@ -91,27 +65,68 @@ const Sidebar = ({ menus }: SidebarProps) => {
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
-              }}>
-                <span style={{
+              }}
+            >
+              <span
+                style={{
                   color: "white",
                   fontSize: 14,
                   fontWeight: 700,
                   fontFamily: "-apple-system, sans-serif",
-                }}>
+                  letterSpacing: 0.5,
+                }}
+              >
+                RS
+              </span>
+            </div>
+          ) : (
+            /* Expanded — RS box + BizTrack name */
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  background: "rgba(255,255,255,0.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <span
+                  style={{
+                    color: "white",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    fontFamily: "-apple-system, sans-serif",
+                  }}
+                >
                   RS
                 </span>
               </div>
-              <div style={{
-                borderLeft: "1px solid rgba(96,165,250,0.3)",
-                paddingLeft: 10,
-                whiteSpace: "nowrap",
-              }}>
-                <span style={{
-                  color: "white",
-                  fontSize: 16,
-                  fontWeight: 300,
-                  fontFamily: "-apple-system, sans-serif",
-                }}>
+              <div
+                style={{
+                  borderLeft: "1px solid rgba(96,165,250,0.3)",
+                  paddingLeft: 10,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span
+                  style={{
+                    color: "white",
+                    fontSize: 16,
+                    fontWeight: 300,
+                    fontFamily: "-apple-system, sans-serif",
+                  }}
+                >
                   Biz<strong style={{ fontWeight: 700 }}>Track</strong>
                 </span>
               </div>
@@ -125,23 +140,22 @@ const Sidebar = ({ menus }: SidebarProps) => {
           onClick={() => dispatch(toggleSidebar())}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {collapsed
-            ? <ChevronRight size={13} />
-            : <ChevronLeft size={13} />
-          }
+          {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
         </button>
       </div>
 
       {/* ── Nav ── */}
-      <nav style={{
-        flex: 1,
-        padding: "10px 8px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        overflowY: "auto",
-        overflowX: "hidden",
-      }}>
+      <nav
+        style={{
+          flex: 1,
+          padding: "10px 8px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          overflowY: "auto",
+          overflowX: "hidden",
+        }}
+      >
         {menus.map((menu) => {
           const Icon = getIcon(menu.icon);
           return (
@@ -161,9 +175,7 @@ const Sidebar = ({ menus }: SidebarProps) => {
             >
               <Icon size={19} style={{ flexShrink: 0 }} />
               {!collapsed && (
-                <span style={{ whiteSpace: "nowrap" }}>
-                  {menu.label}
-                </span>
+                <span style={{ whiteSpace: "nowrap" }}>{menu.label}</span>
               )}
             </NavLink>
           );
@@ -171,16 +183,18 @@ const Sidebar = ({ menus }: SidebarProps) => {
       </nav>
 
       {/* ── Footer ── */}
-      <div style={{
-        borderTop: "1px solid rgba(255,255,255,0.08)",
-        padding: "12px 10px",
-        color: "rgba(255,255,255,0.2)",
-        fontSize: 10,
-        textAlign: collapsed ? "center" : "left",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        flexShrink: 0,
-      }}>
+      <div
+        style={{
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          padding: "12px 10px",
+          color: "rgba(255,255,255,0.2)",
+          fontSize: 10,
+          textAlign: collapsed ? "center" : "left",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          flexShrink: 0,
+        }}
+      >
         {collapsed ? "v1" : "RSBizTrack v1.0"}
       </div>
     </aside>
