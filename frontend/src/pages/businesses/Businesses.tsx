@@ -21,7 +21,7 @@ import {
 } from "@/api/modules/businessApi";
 import type { Business, BusinessCreate, BusinessUpdate } from "@/types/business";
 
-// ── Empty form state ──
+  
 const emptyForm = { name: "", description: "" };
 
 const Businesses = () => {
