@@ -1,18 +1,20 @@
-// Shape of data coming FROM the API (response)
+// Simple stock — for update response
 export interface Stock {
-    id: number
-    product_id: number
-    quantity: number
-    last_updated: string
+  id: number;
+  product_id: number;
+  quantity: number;
+  last_updated: string;
 }
 
-// Shape of data going TO the API (create)
-export interface StockCreate {
-    product_id: number
-    quantity?: number | null
+// Stock with product name — for list view
+export interface StockWithProduct {
+  id: number;
+  product_id: number;
+  product_name: string;  
+  quantity: number;
+  last_updated: string;
 }
 
-// Shape of data going TO the API (update)
 export interface StockUpdate {
-  quantity?: number | null
+  quantity: number;
 }

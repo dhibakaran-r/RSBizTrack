@@ -14,45 +14,45 @@ import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 // API + Types
 import {
-  getAllBusinesses,
-  createBusiness,
-  updateBusiness,
-  deleteBusiness,
-} from "@/api/modules/businessApi";
-import type { Business, BusinessCreate, BusinessUpdate } from "@/types/business";
+  getAllUnits,
+  createUnit,
+  updateUnit,
+  deleteUnit,
+} from "@/api/modules/unitApi";
+import type { Unit, UnitCreate, UnitUpdate } from "@/types/unit";
 
   
-const emptyForm = { name: "", description: "" };
+const emptyForm = { name: "", shortName: "" };
 
-const Businesses = () => {
+const Units = () => {
   // ── State ──
-  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
-  const [editItem, setEditItem] = useState<Business | null>(null);
+  const [editItem, setEditItem] = useState<Unit | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
   // Delete state
-  const [deleteItem, setDeleteItem] = useState<Business | null>(null);
+  const [deleteItem, setDeleteItem] = useState<Unit | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   // Pagination state
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  // ── Fetch all businesses ──
-  const fetchBusinesses = async () => {
+  // ── Fetch all units ──
+  const fetchUnits = async () => {
     try {
       setLoading(true);
-      const data = await getAllBusinesses();
-      setBusinesses(data);
+      const data = await getAllUnits();
+      setUnits(data);
     } catch (err) {
-      toast.error("Failed to load businesses");
+      toast.error("Failed to load units");
     } finally {
       setLoading(false);
     }
@@ -60,52 +60,32 @@ const Businesses = () => {
 
   // Fetch on mount
   useEffect(() => {
-    fetchBusinesses();
+    fetchUnits();
   }, []);
 
   // ── Search filter ──
-  // Filter businesses based on search input — client side
-  const filtered = businesses.filter((b) =>
+  // Filter units based on search input — client side
+  const filtered = units.filter((b) =>
     b.name.toLowerCase().includes(search.toLowerCase()) ||
-    (b.description ?? "").toLowerCase().includes(search.toLowerCase())
+    (b.shortName ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
   // Paginate filtered results
   const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   // ── Table columns definition ──
-  const columns: Column<Business>[] = [
+  const columns: Column<Unit>[] = [
     {
       header: "Name",
       accessor: "name",
     },
     {
-      header: "Description",
-      accessor: (row) => row.description || (
+      header: "Short name",
+      accessor: (row) => row.shortName || (
         <span style={{ color: "#94a3b8", fontStyle: "italic" }}>
-          No description
+          No shortName
         </span>
       ),
-    },
-    {
-      header: "Status",
-      accessor: (row) => (
-        <Badge
-          label={row.is_active ? "Active" : "Inactive"}
-          type={row.is_active ? "success" : "danger"}
-        />
-      ),
-      width: 100,
-    },
-    {
-      header: "Created",
-      accessor: (row) =>
-        new Date(row.created_at).toLocaleDateString("en-IN", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }),
-      width: 130,
     },
   ];
 
@@ -118,26 +98,26 @@ const Businesses = () => {
   };
 
   // ── Open Edit modal ──
-  const handleEdit = (business: Business) => {
-    setEditItem(business);
+  const handleEdit = (unit: Unit) => {
+    setEditItem(unit);
     setForm({
-      name: business.name,
-      description: business.description ?? "",
+      name: unit.name,
+      shortName: unit.shortName ?? "",
     });
     setFormErrors({});
     setModalOpen(true);
   };
 
   // ── Open Delete confirm ──
-  const handleDeleteClick = (business: Business) => {
-    setDeleteItem(business);
+  const handleDeleteClick = (unit: Unit) => {
+    setDeleteItem(unit);
   };
 
   // ── Form validation ──
   const validate = (): boolean => {
     const errors: Record<string, string> = {};
     if (!form.name.trim()) {
-      errors.name = "Business name is required";
+      errors.name = "Unit name is required";
     }
     setFormErrors(errors);
     // Returns true if no errors
@@ -154,25 +134,25 @@ const Businesses = () => {
 
       if (editItem) {
         // Update existing
-        const payload: BusinessUpdate = {
+        const payload: UnitUpdate = {
           name: form.name.trim(),
-          description: form.description.trim() || undefined,
+          shortName: form.shortName.trim() || undefined,
         };
-        await updateBusiness(editItem.id, payload);
-        toast.success("Business updated successfully!");
+        await updateUnit(editItem.id, payload);
+        toast.success("Unit updated successfully!");
       } else {
         // Create new
-        const payload: BusinessCreate = {
+        const payload: UnitCreate = {
           name: form.name.trim(),
-          description: form.description.trim() || undefined,
+          shortName: form.shortName.trim() || undefined,
         };
-        await createBusiness(payload);
-        toast.success("Business created successfully!");
+        await createUnit(payload);
+        toast.success("Unit created successfully!");
       }
 
       // Close modal + refresh list
       setModalOpen(false);
-      fetchBusinesses();
+      fetchUnits();
     } catch (err: any) {
       toast.error(
         err.response?.data?.detail || "Something went wrong"
@@ -188,13 +168,13 @@ const Businesses = () => {
 
     try {
       setDeleting(true);
-      await deleteBusiness(deleteItem.id);
-      toast.success("Business deleted successfully!");
+      await deleteUnit(deleteItem.id);
+      toast.success("Unit deleted successfully!");
       setDeleteItem(null);
-      fetchBusinesses();
+      fetchUnits();
     } catch (err: any) {
       toast.error(
-        err.response?.data?.detail || "Failed to delete business"
+        err.response?.data?.detail || "Failed to delete unit"
       );
     } finally {
       setDeleting(false);
@@ -206,10 +186,10 @@ const Businesses = () => {
     <div>
       {/* Page Header */}
       <PageHeader
-        title="Businesses"
-        subtitle="Manage your business verticals"
+        title="Units"
+        subtitle="Manage your unit verticals"
         onAdd={handleAdd}
-        addLabel="Add Business"
+        addLabel="Add Unit"
       />
 
       {/* Search + Stats bar */}
@@ -227,7 +207,7 @@ const Businesses = () => {
             setSearch(val);
             setPage(1); // Reset to page 1 on search
           }}
-          placeholder="Search businesses..."
+          placeholder="Search units..."
         />
 
         {/* Total count */}
@@ -240,7 +220,7 @@ const Businesses = () => {
         }}>
           <Building2 size={15} />
           <span>
-            {loading ? "..." : `${filtered.length} businesses`}
+            {loading ? "..." : `${filtered.length} units`}
           </span>
         </div>
       </div>
@@ -252,7 +232,7 @@ const Businesses = () => {
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDeleteClick}
-        emptyMessage="No businesses found. Add your first business!"
+        emptyMessage="No units found. Add your first unit!"
         page={page}
         pageSize={pageSize}
         total={filtered.length}
@@ -262,11 +242,11 @@ const Businesses = () => {
       {/* Add / Edit Modal */}
       <Modal
         open={modalOpen}
-        title={editItem ? "Edit Business" : "Add Business"}
+        title={editItem ? "Edit Unit" : "Add Unit"}
         onClose={() => setModalOpen(false)}
       >
         <FormInput
-          label="Business Name"
+          label="Unit Name"
           value={form.name}
           onChange={(val) => setForm({ ...form, name: val })}
           placeholder="e.g. Hardware Shop"
@@ -275,9 +255,9 @@ const Businesses = () => {
         />
         <FormInput
           label="Description"
-          value={form.description}
-          onChange={(val) => setForm({ ...form, description: val })}
-          placeholder="Brief description (optional)"
+          value={form.shortName}
+          onChange={(val) => setForm({ ...form, shortName: val })}
+          placeholder="Brief shortName (optional)"
         />
 
         {/* Modal actions */}
@@ -337,4 +317,4 @@ const Businesses = () => {
   );
 };
 
-export default Businesses;
+export default Units;

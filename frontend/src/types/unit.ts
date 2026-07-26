@@ -1,21 +1,18 @@
 // Shape of data coming FROM the API (response)
-export interface Business {
+export interface Unit {
   id: number;
   name: string;
-  description: string | null;
-  is_active: boolean;
-  created_at: string;
+  shortName: string;
 }
 
 // Shape of data going TO the API (create)
-export interface BusinessCreate {
+export interface UnitCreate {
   name: string;
-  description?: string;
+  shortName?: string;
 }
 
 // Shape of data going TO the API (update)
-export interface BusinessUpdate {
+export interface UnitUpdate {
   name?: string;
-  description?: string;
-  is_active?: boolean;
+  shortName?: string;
 }

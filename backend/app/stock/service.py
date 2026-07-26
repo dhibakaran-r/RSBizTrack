@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app.stock.model import Stock
 from app.stock.schema import StockCreate, StockUpdate
+from app.products.model import Product
 
 def create_Stock(db: Session, data: StockCreate):
     stock = Stock(
@@ -15,7 +16,35 @@ def create_Stock(db: Session, data: StockCreate):
 
 
 def get_all_Stocks(db: Session):
-    return db.query(Stock).all()
+    """
+    Fetch all stocks with product name using JOIN.
+    
+    SQL equivalent:
+    SELECT stock.*, products.name as product_name
+    FROM stock
+    JOIN products ON stock.product_id = products.id
+    """
+
+    # return db.query(Stock).all()
+    results = (
+        db.query(Stock, Product.name.label("product_name"))
+        .join(Product, Stock.product_id == Product.id)
+        .filter(Product.is_active == True)
+        .order_by(Stock.id.asc())
+        .all()
+    )
+
+    return [
+        {
+            "id": stock.id,
+            "product_id": stock.product_id,
+            "product_name": product_name,
+            "quantity": float(stock.quantity),
+            "last_updated": stock.last_updated,
+        }
+        for stock, product_name in results
+    ]
+
 
 def get_Stock_by_id(db: Session, Stock_id: int):
     return db.query(Stock).filter(Stock.id == Stock_id).first()

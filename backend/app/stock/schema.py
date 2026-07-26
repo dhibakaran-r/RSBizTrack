@@ -18,3 +18,13 @@ class StockResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class StockResponseWithProduct(BaseModel):
+    id: int
+    product_id: int
+    product_name: str
+    quantity: float
+    last_updated: datetime
+
+    class Config:
+        from_attributes = True

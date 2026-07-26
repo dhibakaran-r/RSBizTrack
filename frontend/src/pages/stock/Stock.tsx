@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Building2 } from "lucide-react";
-
-// Components
+import { BarChart3 } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 import SearchBar from "@/components/common/SearchBar";
 import DataTable from "@/components/common/DataTable";
@@ -10,227 +8,139 @@ import type { Column } from "@/components/common/DataTable";
 import Modal from "@/components/common/Modal";
 import FormInput from "@/components/common/FormInput";
 import Badge from "@/components/common/Badge";
-import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { getAllStocks, updateStock } from "@/api/modules/stockApi";
+import type { StockWithProduct, StockUpdate } from "@/types/stock";
 
-// API + Types
-import {
-  getAllBusinesses,
-  createBusiness,
-  updateBusiness,
-  deleteBusiness,
-} from "@/api/modules/businessApi";
-import type { Business, BusinessCreate, BusinessUpdate } from "@/types/business";
-
-  
-const emptyForm = { name: "", description: "" };
-
-const Businesses = () => {
-  // ── State ──
-  const [businesses, setBusinesses] = useState<Business[]>([]);
+const Stock = () => {
+  const [stocks, setStocks] = useState<StockWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-
-  // Modal state
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editItem, setEditItem] = useState<Business | null>(null);
-  const [form, setForm] = useState(emptyForm);
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [saving, setSaving] = useState(false);
-
-  // Delete state
-  const [deleteItem, setDeleteItem] = useState<Business | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
-  // Pagination state
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  // ── Fetch all businesses ──
-  const fetchBusinesses = async () => {
+  // Edit modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editItem, setEditItem] = useState<StockWithProduct | null>(null);
+  const [quantity, setQuantity] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  // Fetch all stocks
+  const fetchStocks = async () => {
     try {
       setLoading(true);
-      const data = await getAllBusinesses();
-      setBusinesses(data);
-    } catch (err) {
-      toast.error("Failed to load businesses");
+      const data = await getAllStocks();
+      setStocks(data);
+    } catch {
+      toast.error("Failed to load stocks");
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch on mount
   useEffect(() => {
-    fetchBusinesses();
+    fetchStocks();
   }, []);
 
-  // ── Search filter ──
-  // Filter businesses based on search input — client side
-  const filtered = businesses.filter((b) =>
-    b.name.toLowerCase().includes(search.toLowerCase()) ||
-    (b.description ?? "").toLowerCase().includes(search.toLowerCase())
+  // Search filter
+  const filtered = stocks.filter((s) =>
+    s.product_name.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Paginate filtered results
-  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const paginated = filtered.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
 
-  // ── Table columns definition ──
-  const columns: Column<Business>[] = [
+  // Table columns
+  const columns: Column<StockWithProduct>[] = [
     {
-      header: "Name",
-      accessor: "name",
+      header: "Product Name",
+      accessor: "product_name",
     },
     {
-      header: "Description",
-      accessor: (row) => row.description || (
-        <span style={{ color: "#94a3b8", fontStyle: "italic" }}>
-          No description
+      header: "Current Stock",
+      accessor: (row) => (
+        <span style={{ fontWeight: 600, color: "#1e293b" }}>
+          {row.quantity}
         </span>
       ),
+      width: 140,
     },
     {
       header: "Status",
       accessor: (row) => (
         <Badge
-          label={row.is_active ? "Active" : "Inactive"}
-          type={row.is_active ? "success" : "danger"}
+          label={row.quantity === 0 ? "Out of Stock" : row.quantity < 10 ? "Low Stock" : "In Stock"}
+          type={row.quantity === 0 ? "danger" : row.quantity < 10 ? "warning" : "success"}
         />
       ),
-      width: 100,
+      width: 120,
     },
     {
-      header: "Created",
+      header: "Last Updated",
       accessor: (row) =>
-        new Date(row.created_at).toLocaleDateString("en-IN", {
+        new Date(row.last_updated).toLocaleDateString("en-IN", {
           day: "2-digit",
           month: "short",
           year: "numeric",
         }),
-      width: 130,
+      width: 140,
     },
   ];
 
-  // ── Open Add modal ──
-  const handleAdd = () => {
-    setEditItem(null);
-    setForm(emptyForm);
-    setFormErrors({});
+  // Open edit modal
+  const handleEdit = (stock: StockWithProduct) => {
+    setEditItem(stock);
+    setQuantity(String(stock.quantity));
     setModalOpen(true);
   };
 
-  // ── Open Edit modal ──
-  const handleEdit = (business: Business) => {
-    setEditItem(business);
-    setForm({
-      name: business.name,
-      description: business.description ?? "",
-    });
-    setFormErrors({});
-    setModalOpen(true);
-  };
-
-  // ── Open Delete confirm ──
-  const handleDeleteClick = (business: Business) => {
-    setDeleteItem(business);
-  };
-
-  // ── Form validation ──
-  const validate = (): boolean => {
-    const errors: Record<string, string> = {};
-    if (!form.name.trim()) {
-      errors.name = "Business name is required";
-    }
-    setFormErrors(errors);
-    // Returns true if no errors
-    return Object.keys(errors).length === 0;
-  };
-
-  // ── Save (Create or Update) ──
+  // Save updated quantity
   const handleSave = async () => {
-    // Validate first
-    if (!validate()) return;
+    if (!editItem) return;
+
+    const qty = parseFloat(quantity);
+
+    if (isNaN(qty) || qty < 0) {
+      toast.error("Please enter a valid quantity");
+      return;
+    }
 
     try {
       setSaving(true);
-
-      if (editItem) {
-        // Update existing
-        const payload: BusinessUpdate = {
-          name: form.name.trim(),
-          description: form.description.trim() || undefined,
-        };
-        await updateBusiness(editItem.id, payload);
-        toast.success("Business updated successfully!");
-      } else {
-        // Create new
-        const payload: BusinessCreate = {
-          name: form.name.trim(),
-          description: form.description.trim() || undefined,
-        };
-        await createBusiness(payload);
-        toast.success("Business created successfully!");
-      }
-
-      // Close modal + refresh list
+      const payload: StockUpdate = { quantity: qty };
+      await updateStock(editItem.id, payload);
+      toast.success("Stock updated successfully!");
       setModalOpen(false);
-      fetchBusinesses();
-    } catch (err: any) {
-      toast.error(
-        err.response?.data?.detail || "Something went wrong"
-      );
+      fetchStocks();
+    } catch {
+      toast.error("Failed to update stock");
     } finally {
       setSaving(false);
     }
   };
 
-  // ── Confirm Delete ──
-  const handleDeleteConfirm = async () => {
-    if (!deleteItem) return;
-
-    try {
-      setDeleting(true);
-      await deleteBusiness(deleteItem.id);
-      toast.success("Business deleted successfully!");
-      setDeleteItem(null);
-      fetchBusinesses();
-    } catch (err: any) {
-      toast.error(
-        err.response?.data?.detail || "Failed to delete business"
-      );
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  // ── Render ──
   return (
     <div>
-      {/* Page Header */}
       <PageHeader
-        title="Businesses"
-        subtitle="Manage your business verticals"
-        onAdd={handleAdd}
-        addLabel="Add Business"
+        title="Stock Management"
+        subtitle="Track and update inventory levels"
       />
 
-      {/* Search + Stats bar */}
+      {/* Search + count */}
       <div style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         marginBottom: 16,
-        gap: 12,
         flexWrap: "wrap",
+        gap: 12,
       }}>
         <SearchBar
           value={search}
-          onChange={(val) => {
-            setSearch(val);
-            setPage(1); // Reset to page 1 on search
-          }}
-          placeholder="Search businesses..."
+          onChange={(val) => { setSearch(val); setPage(1); }}
+          placeholder="Search by product name..."
         />
-
-        {/* Total count */}
         <div style={{
           display: "flex",
           alignItems: "center",
@@ -238,49 +148,54 @@ const Businesses = () => {
           fontSize: 13,
           color: "#64748b",
         }}>
-          <Building2 size={15} />
-          <span>
-            {loading ? "..." : `${filtered.length} businesses`}
-          </span>
+          <BarChart3 size={15} />
+          {loading ? "..." : `${filtered.length} products`}
         </div>
       </div>
 
-      {/* Data Table */}
+      {/* Table — no delete, only edit */}
       <DataTable
         columns={columns}
         data={paginated}
         loading={loading}
         onEdit={handleEdit}
-        onDelete={handleDeleteClick}
-        emptyMessage="No businesses found. Add your first business!"
+        emptyMessage="No stock records found"
         page={page}
         pageSize={pageSize}
         total={filtered.length}
         onPageChange={setPage}
       />
 
-      {/* Add / Edit Modal */}
+      {/* Edit Modal */}
       <Modal
         open={modalOpen}
-        title={editItem ? "Edit Business" : "Add Business"}
+        title={`Update Stock — ${editItem?.product_name}`}
         onClose={() => setModalOpen(false)}
+        width={400}
       >
+        <div style={{
+          background: "#f8fafc",
+          borderRadius: 8,
+          padding: "12px 16px",
+          marginBottom: 16,
+          fontSize: 13,
+          color: "#475569",
+        }}>
+          Current quantity:
+          <strong style={{ marginLeft: 6, color: "#1e293b" }}>
+            {editItem?.quantity}
+          </strong>
+        </div>
+
         <FormInput
-          label="Business Name"
-          value={form.name}
-          onChange={(val) => setForm({ ...form, name: val })}
-          placeholder="e.g. Hardware Shop"
+          label="New Quantity"
+          value={quantity}
+          onChange={setQuantity}
+          type="number"
+          placeholder="Enter new quantity"
           required
-          error={formErrors.name}
-        />
-        <FormInput
-          label="Description"
-          value={form.description}
-          onChange={(val) => setForm({ ...form, description: val })}
-          placeholder="Brief description (optional)"
         />
 
-        {/* Modal actions */}
         <div style={{
           display: "flex",
           gap: 10,
@@ -315,26 +230,12 @@ const Businesses = () => {
               fontWeight: 500,
             }}
           >
-            {saving
-              ? "Saving..."
-              : editItem
-              ? "Update"
-              : "Create"
-            }
+            {saving ? "Saving..." : "Update Stock"}
           </button>
         </div>
       </Modal>
-
-      {/* Delete Confirm Dialog */}
-      <ConfirmDialog
-        open={!!deleteItem}
-        message={`Are you sure you want to delete "${deleteItem?.name}"? This action cannot be undone.`}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteItem(null)}
-        loading={deleting}
-      />
     </div>
   );
 };
 
-export default Businesses;
+export default Stock;

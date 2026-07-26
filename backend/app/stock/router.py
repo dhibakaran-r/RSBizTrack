@@ -3,11 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
-from app.stock.schema import StockCreate, StockUpdate, StockResponse
+from app.stock.schema import StockCreate, StockUpdate, StockResponse, StockResponseWithProduct
 from app.stock import service
 
 router = APIRouter(
-    prefix="/Stocks",
+    prefix="/stocks",
     tags=["Stocks"],
     dependencies=[Depends(get_current_user)]
 )
@@ -18,7 +18,7 @@ def create(data: StockCreate, db: Session = Depends(get_db)):
     return service.create_Stock(db, data)
 
 # get all Stocks
-@router.get("/all", response_model=List[StockResponse])
+@router.get("/all", response_model=List[StockResponseWithProduct])
 def get_all(db: Session = Depends(get_db)):
     return service.get_all_Stocks(db)
 
