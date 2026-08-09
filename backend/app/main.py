@@ -1,8 +1,17 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi 
 from fastapi.security import HTTPBearer
 from app.core.config import settings
+from fastapi.exceptions import RequestValidationError
+from app.core.exceptions import AppException
+from app.core.exception_handlers import (
+    app_exception_handler,
+    http_exception_handler,
+    validation_exception_handler,
+    unhandled_exception_handler,
+)
+
 from app.auth.router import router as auth_router
 from app.menus.router import router as menu_router
 from app.dashboard.router import router as dashboard_router
@@ -55,6 +64,26 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+app.add_exception_handler(
+    AppException,
+    app_exception_handler,
+)
+
+app.add_exception_handler(
+    HTTPException,
+    http_exception_handler,
+)
+
+app.add_exception_handler(
+    RequestValidationError,
+    validation_exception_handler,
+)
+
+app.add_exception_handler(
+    Exception,
+    unhandled_exception_handler,
 )
 
 app.include_router(auth_router)

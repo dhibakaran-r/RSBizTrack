@@ -7,22 +7,17 @@ import PageHeader from "@/components/common/PageHeader";
 import SearchBar from "@/components/common/SearchBar";
 import DataTable from "@/components/common/DataTable";
 import type { Column } from "@/components/common/DataTable";
-import Modal from "@/components/common/Modal";
-import FormInput from "@/components/common/FormInput";
 import Badge from "@/components/common/Badge";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 // API + Types
 import {
   getAllBusinesses,
-  createBusiness,
-  updateBusiness,
   deleteBusiness,
 } from "@/api/modules/businessApi";
-import type { Business, BusinessCreate, BusinessUpdate } from "@/types/business";
-
-  
-const emptyForm = { name: "", description: "" };
+import type { Business } from "@/types/business";
+import BusinessAddEdit from "./BusinessAddEdit";
+import { useDateTime } from "@/hooks/formatDateTime";
 
 const Businesses = () => {
   // ── State ──
@@ -33,9 +28,7 @@ const Businesses = () => {
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<Business | null>(null);
-  const [form, setForm] = useState(emptyForm);
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [saving, setSaving] = useState(false);
+
 
   // Delete state
   const [deleteItem, setDeleteItem] = useState<Business | null>(null);
@@ -45,12 +38,14 @@ const Businesses = () => {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
+  const { formatDate, formatDateTime } = useDateTime();
+
   // ── Fetch all businesses ──
   const fetchBusinesses = async () => {
     try {
       setLoading(true);
-      const data = await getAllBusinesses();
-      setBusinesses(data);
+      const response = await getAllBusinesses();
+      setBusinesses(response.data || []);
     } catch (err) {
       toast.error("Failed to load businesses");
     } finally {
@@ -91,20 +86,22 @@ const Businesses = () => {
       header: "Status",
       accessor: (row) => (
         <Badge
-          label={row.is_active ? "Active" : "Inactive"}
-          type={row.is_active ? "success" : "danger"}
+          label={row.isActive ? "Active" : "Inactive"}
+          type={row.isActive ? "success" : "danger"}
         />
       ),
       width: 100,
     },
     {
       header: "Created",
-      accessor: (row) =>
-        new Date(row.created_at).toLocaleDateString("en-IN", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }),
+      accessor: (row) =>(
+        formatDate(row.createdAt)
+      ),
+        // new Date(row.created_at).toLocaleDateString("en-IN", {
+        //   day: "2-digit",
+        //   month: "short",
+        //   year: "numeric",
+        // }),
       width: 130,
     },
   ];
@@ -112,19 +109,12 @@ const Businesses = () => {
   // ── Open Add modal ──
   const handleAdd = () => {
     setEditItem(null);
-    setForm(emptyForm);
-    setFormErrors({});
     setModalOpen(true);
   };
 
   // ── Open Edit modal ──
   const handleEdit = (business: Business) => {
     setEditItem(business);
-    setForm({
-      name: business.name,
-      description: business.description ?? "",
-    });
-    setFormErrors({});
     setModalOpen(true);
   };
 
@@ -133,54 +123,11 @@ const Businesses = () => {
     setDeleteItem(business);
   };
 
-  // ── Form validation ──
-  const validate = (): boolean => {
-    const errors: Record<string, string> = {};
-    if (!form.name.trim()) {
-      errors.name = "Business name is required";
-    }
-    setFormErrors(errors);
-    // Returns true if no errors
-    return Object.keys(errors).length === 0;
-  };
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setEditItem(null);
+  }
 
-  // ── Save (Create or Update) ──
-  const handleSave = async () => {
-    // Validate first
-    if (!validate()) return;
-
-    try {
-      setSaving(true);
-
-      if (editItem) {
-        // Update existing
-        const payload: BusinessUpdate = {
-          name: form.name.trim(),
-          description: form.description.trim() || undefined,
-        };
-        await updateBusiness(editItem.id, payload);
-        toast.success("Business updated successfully!");
-      } else {
-        // Create new
-        const payload: BusinessCreate = {
-          name: form.name.trim(),
-          description: form.description.trim() || undefined,
-        };
-        await createBusiness(payload);
-        toast.success("Business created successfully!");
-      }
-
-      // Close modal + refresh list
-      setModalOpen(false);
-      fetchBusinesses();
-    } catch (err: any) {
-      toast.error(
-        err.response?.data?.detail || "Something went wrong"
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
 
   // ── Confirm Delete ──
   const handleDeleteConfirm = async () => {
@@ -260,70 +207,14 @@ const Businesses = () => {
       />
 
       {/* Add / Edit Modal */}
-      <Modal
-        open={modalOpen}
-        title={editItem ? "Edit Business" : "Add Business"}
-        onClose={() => setModalOpen(false)}
-      >
-        <FormInput
-          label="Business Name"
-          value={form.name}
-          onChange={(val) => setForm({ ...form, name: val })}
-          placeholder="e.g. Hardware Shop"
-          required
-          error={formErrors.name}
+      { modalOpen && (
+        <BusinessAddEdit
+          open={modalOpen}
+          editItem={editItem}
+          closeModal={handleCloseModal}
+          onSuccess={fetchBusinesses}
         />
-        <FormInput
-          label="Description"
-          value={form.description}
-          onChange={(val) => setForm({ ...form, description: val })}
-          placeholder="Brief description (optional)"
-        />
-
-        {/* Modal actions */}
-        <div style={{
-          display: "flex",
-          gap: 10,
-          justifyContent: "flex-end",
-          marginTop: 8,
-        }}>
-          <button
-            onClick={() => setModalOpen(false)}
-            style={{
-              padding: "8px 18px",
-              fontSize: 14,
-              border: "1px solid #e2e8f0",
-              borderRadius: 8,
-              background: "white",
-              color: "#475569",
-              cursor: "pointer",
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            style={{
-              padding: "8px 18px",
-              fontSize: 14,
-              border: "none",
-              borderRadius: 8,
-              background: saving ? "#93c5fd" : "#2563eb",
-              color: "white",
-              cursor: saving ? "not-allowed" : "pointer",
-              fontWeight: 500,
-            }}
-          >
-            {saving
-              ? "Saving..."
-              : editItem
-              ? "Update"
-              : "Create"
-            }
-          </button>
-        </div>
-      </Modal>
+      )}
 
       {/* Delete Confirm Dialog */}
       <ConfirmDialog

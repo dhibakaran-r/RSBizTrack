@@ -3,8 +3,8 @@ export interface Business {
   id: number;
   name: string;
   description: string | null;
-  is_active: boolean;
-  created_at: string;
+  isActive: boolean;
+  createdAt: string;
 }
 
 // Shape of data going TO the API (create)
@@ -17,5 +17,5 @@ export interface BusinessCreate {
 export interface BusinessUpdate {
   name?: string;
   description?: string;
-  is_active?: boolean;
+  isActive?: boolean;
 }

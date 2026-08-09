@@ -5,7 +5,7 @@ import PageHeader from "@/components/common/PageHeader";
 import SearchBar from "@/components/common/SearchBar";
 import DataTable from "@/components/common/DataTable";
 import type { Column } from "@/components/common/DataTable";
-import Modal from "@/components/common/Modal";
+import StockAddEdit from "./StockAddEdit";
 import FormInput from "@/components/common/FormInput";
 import Badge from "@/components/common/Badge";
 import { getAllStocks, updateStock } from "@/api/modules/stockApi";
@@ -166,74 +166,14 @@ const Stock = () => {
         onPageChange={setPage}
       />
 
-      {/* Edit Modal */}
-      <Modal
-        open={modalOpen}
-        title={`Update Stock — ${editItem?.product_name}`}
-        onClose={() => setModalOpen(false)}
-        width={400}
-      >
-        <div style={{
-          background: "#f8fafc",
-          borderRadius: 8,
-          padding: "12px 16px",
-          marginBottom: 16,
-          fontSize: 13,
-          color: "#475569",
-        }}>
-          Current quantity:
-          <strong style={{ marginLeft: 6, color: "#1e293b" }}>
-            {editItem?.quantity}
-          </strong>
-        </div>
-
-        <FormInput
-          label="New Quantity"
-          value={quantity}
-          onChange={setQuantity}
-          type="number"
-          placeholder="Enter new quantity"
-          required
+      {modalOpen && (
+        <StockAddEdit
+          open={modalOpen}
+          editItem={editItem}
+          closeModal={() => setModalOpen(false)}
+          onSuccess={fetchStocks}
         />
-
-        <div style={{
-          display: "flex",
-          gap: 10,
-          justifyContent: "flex-end",
-          marginTop: 8,
-        }}>
-          <button
-            onClick={() => setModalOpen(false)}
-            style={{
-              padding: "8px 18px",
-              fontSize: 14,
-              border: "1px solid #e2e8f0",
-              borderRadius: 8,
-              background: "white",
-              color: "#475569",
-              cursor: "pointer",
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            style={{
-              padding: "8px 18px",
-              fontSize: 14,
-              border: "none",
-              borderRadius: 8,
-              background: saving ? "#93c5fd" : "#2563eb",
-              color: "white",
-              cursor: saving ? "not-allowed" : "pointer",
-              fontWeight: 500,
-            }}
-          >
-            {saving ? "Saving..." : "Update Stock"}
-          </button>
-        </div>
-      </Modal>
+      )}
     </div>
   );
 };

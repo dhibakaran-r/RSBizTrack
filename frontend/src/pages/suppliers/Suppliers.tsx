@@ -7,8 +7,7 @@ import PageHeader from "@/components/common/PageHeader";
 import SearchBar from "@/components/common/SearchBar";
 import DataTable from "@/components/common/DataTable";
 import type { Column } from "@/components/common/DataTable";
-import Modal from "@/components/common/Modal";
-import FormInput from "@/components/common/FormInput";
+import SuppliersAddEdit from "./SuppliersAddEdit";
 import Badge from "@/components/common/Badge";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 
@@ -266,71 +265,14 @@ const Suppliers = () => {
         onPageChange={setPage}
       />
 
-      {/* Add / Edit Modal */}
-      <Modal
-        open={modalOpen}
-        title={editItem ? "Edit Supplier" : "Add Supplier"}
-        onClose={() => setModalOpen(false)}
-      >
-        <FormInput
-          label="Supplier Name"
-          value={form.name}
-          onChange={(val) => setForm({ ...form, name: val })}
-          placeholder="e.g. Hardware Shop"
-          required
-          error={formErrors.name}
+      {modalOpen && (
+        <SuppliersAddEdit
+          open={modalOpen}
+          editItem={editItem}
+          closeModal={() => setModalOpen(false)}
+          onSuccess={fetchSuppliers}
         />
-        <FormInput
-          label="Description"
-          value={form.description}
-          onChange={(val) => setForm({ ...form, description: val })}
-          placeholder="Brief description (optional)"
-        />
-
-        {/* Modal actions */}
-        <div style={{
-          display: "flex",
-          gap: 10,
-          justifyContent: "flex-end",
-          marginTop: 8,
-        }}>
-          <button
-            onClick={() => setModalOpen(false)}
-            style={{
-              padding: "8px 18px",
-              fontSize: 14,
-              border: "1px solid #e2e8f0",
-              borderRadius: 8,
-              background: "white",
-              color: "#475569",
-              cursor: "pointer",
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            style={{
-              padding: "8px 18px",
-              fontSize: 14,
-              border: "none",
-              borderRadius: 8,
-              background: saving ? "#93c5fd" : "#2563eb",
-              color: "white",
-              cursor: saving ? "not-allowed" : "pointer",
-              fontWeight: 500,
-            }}
-          >
-            {saving
-              ? "Saving..."
-              : editItem
-              ? "Update"
-              : "Create"
-            }
-          </button>
-        </div>
-      </Modal>
+      )}
 
       {/* Delete Confirm Dialog */}
       <ConfirmDialog
